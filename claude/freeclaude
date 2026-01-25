@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -x
+
+source ~/bin/enable-proxy
+
+claude
