@@ -1,0 +1,18 @@
+#!/bin/bash
+
+set -x
+
+source ~/bin/enable-proxy
+
+claude update
+npm upgrade -g @musistudio/claude-code-router
+
+claude plugin update superpowers@superpowers-marketplace
+
+npm upgrade -g happy-coder
+
+uv tool upgrade specify-cli
+
+opencode upgrade
+cd ~/.config/opencode/superpowers
+git pull
