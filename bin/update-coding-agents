@@ -7,7 +7,10 @@ source ~/bin/enable-proxy
 claude update
 npm upgrade -g @musistudio/claude-code-router
 
-claude plugin update superpowers@superpowers-marketplace
+claude plugin marketplace update claude-plugins-official
+claude plugin marketplace update superpowers-marketplace
+claude plugin marketplace update awesome-claude-skills
+claude plugin marketplace update ui-ux-pro-max-skill
 
 npm upgrade -g happy-coder
 
