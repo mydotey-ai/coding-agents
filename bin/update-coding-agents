@@ -11,7 +11,7 @@ claude plugin marketplace update claude-plugins-official
 claude plugin marketplace update superpowers-marketplace
 claude plugin marketplace update awesome-claude-skills
 claude plugin marketplace update ui-ux-pro-max-skill
-claude plugin marketplace update jarrodwatts/claude-hud
+claude plugin marketplace update claude-hud
 
 npm upgrade -g happy-coder
 
