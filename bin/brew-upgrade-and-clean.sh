@@ -17,7 +17,7 @@ brew doctor
 brew cleanup
 
 # 5. 清理Cask应用
-brew cleanup --cask
+brew cleanup cask
 
 # 6. 移除孤儿依赖
 brew autoremove
