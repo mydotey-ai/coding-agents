@@ -9,4 +9,4 @@ export ANTHROPIC_DEFAULT_HAIKU_MODEL=
 export ANTHROPIC_DEFAULT_SONNET_MODEL=
 export ANTHROPIC_DEFAULT_OPUS_MODEL=
 
-happy-freeclaude
+happy-freeclaude $@

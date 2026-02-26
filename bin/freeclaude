@@ -4,4 +4,4 @@ set -x
 
 source ~/bin/enable-proxy
 
-claude
+claude $@
