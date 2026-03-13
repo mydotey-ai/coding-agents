@@ -12,6 +12,7 @@ claude plugin marketplace update anthropic-agent-skills
 claude plugin marketplace update superpowers-marketplace
 claude plugin marketplace update ui-ux-pro-max-skill
 claude plugin marketplace update claude-hud
+claude plugin marketplace update pua-skills
 
 npm upgrade -g happy-coder
 
