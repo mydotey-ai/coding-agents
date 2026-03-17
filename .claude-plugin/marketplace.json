@@ -1,0 +1,18 @@
+{
+  "name": "mydotey-marketplace",
+  "owner": {
+    "name": "mydotey-ai",
+    "email": "support@mydotey.org"
+  },
+  "metadata": {
+    "description": "mydotey-ai plugins for Claude Code",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "mydotey-ai",
+      "source": "./claude/plugins/mydotey-ai",
+      "category": "productivity"
+    }
+  ]
+}
