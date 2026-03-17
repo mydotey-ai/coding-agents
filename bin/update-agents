@@ -5,3 +5,4 @@ set -x
 source ~/bin/enable-proxy
 
 openclaw update
+openclaw plugins update --all
