@@ -10,27 +10,52 @@
       "Edit",
       "Write",
       "Delete",
-      "WebSearch",
       "WebFetch",
       "Task",
       "mcp__*"
     ],
-    "deny": [],
+    "deny": [
+      "WebSearch"
+    ],
     "ask": []
   },
-  "statusLine": {
-    "type": "command",
-    "command": "bash -c '\"$(command -v bun)\" \"$(ls -td ~/.claude/plugins/cache/claude-hud/claude-hud/*/ 2>/dev/null | head -1)src/index.ts\"'"
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/rtk-rewrite.sh"
+          }
+        ]
+      }
+    ]
   },
   "enabledPlugins": {
-    "superpowers@superpowers-marketplace": true,
+    "ralph-loop@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
     "jdtls-lsp@claude-plugins-official": true,
-    "frontend-design@claude-plugins-official": true,
-    "ui-ux-pro-max@ui-ux-pro-max-skill": true,
+    "example-skills@anthropic-agent-skills": true,
     "claude-hud@claude-hud": true,
-    "example-skills@anthropic-agent-skills": true
+    "superpowers@superpowers-marketplace": true,
+    "ui-ux-pro-max@ui-ux-pro-max-skill": true,
+    "pua@pua-skills": true
+  },
+  "extraKnownMarketplaces": {
+    "pua-skills": {
+      "source": {
+        "source": "github",
+        "repo": "tanweai/pua"
+      }
+    }
   },
   "language": "Chinese",
-  "skipDangerousModePermissionPrompt": true
+  "skipDangerousModePermissionPrompt": true,
+  "skipWebFetchPreflight": true,
+  "statusLine": {
+    "type": "command",
+    "command": "bash -c 'plugin_dir=$(ls -d \"$HOME\"/.claude/plugins/cache/claude-hud/claude-hud/*/ 2>/dev/null | head -1); exec \"/home/koqizhao/.nvm/versions/node/v22.19.0/bin/bun\" \"${plugin_dir}src/index.ts\"'"
+  }
 }
