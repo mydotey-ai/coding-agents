@@ -1,0 +1,5 @@
+#!/bin/bash
+
+set -x
+
+HAPI_RELAY_FORCE_TCP=true hapi hub --relay > /dev/null 2>&1 &

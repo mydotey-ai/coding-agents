@@ -16,6 +16,7 @@ claude plugin marketplace update claude-hud
 claude plugin marketplace update pua-skills
 
 npm upgrade -g happy-coder
+npm upgrade -g @twsxtd/hapi
 
 uv tool upgrade specify-cli
 
