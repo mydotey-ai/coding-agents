@@ -6,3 +6,4 @@ source ~/bin/enable-proxy
 
 openclaw update
 openclaw plugins update --all
+openclaw gateway restart
