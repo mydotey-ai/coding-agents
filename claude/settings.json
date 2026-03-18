@@ -1,7 +1,8 @@
 {
   "env": {
     "API_TIMEOUT_MS": "600000",
-    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+    "CLAUDE_CODE_DISABLE_1M_CONTEXT": "1"
   },
   "permissions": {
     "allow": [
