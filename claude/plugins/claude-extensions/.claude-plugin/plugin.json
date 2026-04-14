@@ -1,0 +1,11 @@
+{
+  "name": "claude-extensions",
+  "version": "1.0.0",
+  "description": "claude extensions",
+  "author": {
+    "name": "mydotey-ai",
+    "email": "support@mydotey.org"
+  },
+  "license": "MIT",
+  "keywords": ["rules", "hooks", "compact", "auto-load"]
+}

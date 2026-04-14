@@ -11,8 +11,11 @@
   "plugins": [
     {
       "name": "mydotey-ai",
-      "source": "./claude/plugins/mydotey-ai",
-      "category": "productivity"
+      "source": "./claude/plugins/mydotey-ai"
+    },
+    {
+      "name": "claude-extensions",
+      "source": "./claude/plugins/claude-extensions"
     }
   ]
 }
