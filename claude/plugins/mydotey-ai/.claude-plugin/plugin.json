@@ -1,11 +1,11 @@
 {
   "name": "mydotey-ai",
-  "description": "mydotey-ai plugin",
-  "version": "1.3.0",
+  "description": "mydotey-ai plugin - Enhanced project review with multi-project unit detection and directory targeting",
+  "version": "1.4.0",
   "author": {
     "name": "mydotey-ai",
     "email": "support@mydotey.org"
   },
-  "keywords": ["git", "commit", "automation", "productivity"],
+  "keywords": ["git", "commit", "automation", "productivity", "code-review", "multi-project"],
   "license": "MIT"
 }
