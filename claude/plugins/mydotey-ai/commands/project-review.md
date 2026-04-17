@@ -162,7 +162,11 @@ mkdir -p "{PROJECT_ROOT}/docs/review/.tmp"
 
 1. `Read("{PROJECT_ROOT}/.gitignore")`，若不存在则准备新建；若存在但格式异常，发出警告后继续
 2. 用 `Grep` 检查是否已包含 `docs/review` 相关条目（匹配 `docs/review` 或 `docs/review/`）
-3. 若**未包含**，用 `Edit` 在文件末尾追加一行 `docs/review/`；文件不存在则 `Write` 新建，内容仅为 `docs/review/\n`
+3. 若**未包含**，用以下方式追加（注意：`Edit` 是替换操作，必须保留原最后一行）：
+   - 读取文件，取最后一行内容为 `last_line`
+   - 用 `Edit`：`old_string` = `last_line`，`new_string` = `last_line\n\ndocs/review/`（保留原内容 + 空行 + 新条目）
+   - 若文件为空，直接 `Write` 内容为 `docs/review/\n`
+   - 文件不存在则 `Write` 新建，内容为 `docs/review/\n`
 4. 若**已包含**则跳过，避免重复
 
 输出进度提示：`📁 工作区已建立：{PROJECT_ROOT}/docs/review/（已确保 .gitignore 忽略）`

@@ -1,7 +1,7 @@
 {
   "name": "mydotey-ai",
   "description": "mydotey-ai plugin - Comprehensive 10-dimension code review with card-based issue display, problem index table, and multi-project unit detection",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "author": {
     "name": "mydotey-ai",
     "email": "support@mydotey.org"
