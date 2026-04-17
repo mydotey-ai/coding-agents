@@ -299,7 +299,7 @@ cd "{PROJECT_UNITS[0].path}" && review_timeout 60 npx --yes knip --reporter json
 **分批策略：**
 
 | 批次 | 维度 | 数量 | 发起时机 |
-|:----:|------|:----:|----------|
+|------|------|------|----------|
 | 第一批 | security + architecture + performance + error-handling | 4 | 先发起 |
 | 第二批 | observability + data-integrity + scalability | 3 | 第一批全部完成后发起 |
 | 第三批 | dead-code + testing + standards | 3 | 第二批全部完成后发起 |
@@ -609,7 +609,7 @@ total = Σ dimension_score × weights[dimension]
 {若 PROJECT_UNITS_COUNT > 1，显示此表格}
 
 | 序号 | 相对路径 | 技术栈 | 构建文件 |
-|:----:|----------|--------|----------|
+|------|----------|--------|----------|
 | 1 | ./module-a | java, spring-boot | pom.xml |
 | 2 | ./module-b | node, react | package.json |
 | ... |
@@ -625,7 +625,7 @@ total = Σ dimension_score × weights[dimension]
 ## 执行摘要
 
 | 维度 | Agent评分 | 校验评分 | Critical | High | Medium | Low |
-|------|:---------:|:-------:|:--------:|:----:|:------:|:---:|
+|------|---------|-------|--------|----|------|---|
 | 🔒 安全性 | XX | XX | X | X | X | X |
 | 🏗️ 架构 | XX | XX | X | X | X | X |
 | ⚡ 性能 | XX | XX | X | X | X | X |
@@ -648,7 +648,7 @@ total = Σ dimension_score × weights[dimension]
 **⚠️ 必须列举所有 findings，不得遗漏任何一个。**
 
 | ID | 维度 | 标题 | 位置 | 严重度 | 工作量 |
-|:---|:----:|:-----|:----:|:------:|:------:|
+|:---|------|:-----|------|------|------|
 {遍历 issues.json 中所有 findings，按 severity 降序排列：Critical → High → Medium → Low}
 | [{id}](#{id_anchor}) | {emoji} {dimension} | {title} | `{file}:{line}` | {severity_emoji} {severity} | {effort}h |
 
@@ -781,7 +781,7 @@ total = Σ dimension_score × weights[dimension]
 {遍历 issues.json 中所有 Critical findings，全部列举，不得遗漏}
 
 | ID | 标题 | 位置 | 工作量 |
-|:---|:-----|:----:|:------:|
+|:---|:-----|------|------|
 | [{id}](#{id_anchor}) | {title} | `{file}:{line}` | {effort}h |
 
 **示例**（实际执行时必须列举全部，不能用示例代替）：
@@ -792,7 +792,7 @@ total = Σ dimension_score × weights[dimension]
 {遍历 issues.json 中所有 High findings，全部列举，不得遗漏}
 
 | ID | 标题 | 位置 | 工作量 |
-|:---|:-----|:----:|:------:|
+|:---|:-----|------|------|
 | [{id}](#{id_anchor}) | {title} | `{file}:{line}` | {effort}h |
 
 ### P2 · Medium（{N} 个，约 {hours}h）
@@ -800,7 +800,7 @@ total = Σ dimension_score × weights[dimension]
 {遍历 issues.json 中所有 Medium findings，全部列举，不得遗漏}
 
 | ID | 标题 | 位置 | 工作量 |
-|:---|:-----|:----:|:------:|
+|:---|:-----|------|------|
 | [{id}](#{id_anchor}) | {title} | `{file}:{line}` | {effort}h |
 
 ### P3 · Low（{N} 个，约 {hours}h）
@@ -808,7 +808,7 @@ total = Σ dimension_score × weights[dimension]
 {遍历 issues.json 中所有 Low findings，全部列举，不得遗漏}
 
 | ID | 标题 | 位置 | 工作量 |
-|:---|:-----|:----:|:------:|
+|:---|:-----|------|------|
 | [{id}](#{id_anchor}) | {title} | `{file}:{line}` | {effort}h |
 
 **总预估工作量**：{total}h
@@ -840,7 +840,7 @@ total = Σ dimension_score × weights[dimension]
 ### 评分趋势
 
 | 维度 | 上次 Agent | 本次 Agent | 趋势 | 上次校验 | 本次校验 | 趋势 | 备注 |
-|:----:|:----------:|:----------:|:----:|:--------:|:--------:|:----:|------|
+|------|----------|----------|------|--------|--------|------|------|
 | 🔒 安全性 | 78 | 82 | **+4 ↑** | 50 | 55 | **+5 ↑** | |
 | 🏗️ 架构 | N/A | 75 | N/A | N/A | 40 | N/A | 上次未审计 |
 | ⚡ 性能 | 65 | 60 | **-5 ↓** | 55 | 50 | **-5 ↓** | |
@@ -861,7 +861,7 @@ total = Σ dimension_score × weights[dimension]
 ### 项目单元变更详情
 
 | 变更类型 | 项目单元 | 技术栈变更 |
-|:-------:|:--------:|:----------|
+|------|------|:----------|
 | ✅ 新增 | ./module-c | node, vue |
 | ❌ 删除 | ./module-old | - |
 | 🔄 变更 | ./module-a | java → java, kotlin |
