@@ -16,13 +16,13 @@ allowed-tools: ["Bash", "Glob", "Grep", "Read", "Write", "Edit", "Agent"]
 
 | 参数 | 说明 | 默认 |
 |---|---|---|
-| 维度（可多选，空格分隔） | `security` `architecture` `performance` `dead-code` `testing` `standards` | 全部 6 个 |
-| `--quick` | 只跑静态扫描，跳过 6 个深度审计 Agent | 关 |
+| 维度（可多选，空格分隔） | `security` `architecture` `performance` `error-handling` `observability` `data-integrity` `scalability` `dead-code` `testing` `standards` | 全部 10 个 |
+| `--quick` | 只跑静态扫描，跳过 10 个深度审计 Agent | 关 |
 | `--run-tests` | **显式允许**执行测试/覆盖率命令（否则一律跳过） | 关 |
 | `--dir D` | 指定审查目录，相对或绝对路径。默认为项目根目录 `PROJECT_ROOT` | `PROJECT_ROOT` |
 | `--baseline` | 与上次 `docs/review/baseline.json` 对比，输出 delta | 关 |
 | `--max-files N` | 大型项目限流：超过 N 个源文件时，Agent 只检查 `min(N, max_files)` 个关键文件 | 500 |
-| `--weights W` | 自定义评分权重，格式：`security=0.3,architecture=0.2,...`（必须 6 个维度且总和为 1） | 默认权重 |
+| `--weights W` | 自定义评分权重，格式：`security=0.2,architecture=0.15,...`（必须 10 个维度且总和为 1） | 默认权重 |
 
 ### 解析规则
 
@@ -249,14 +249,33 @@ review_timeout 60 cd "{PROJECT_UNITS[0].path}" && npx --yes knip --reporter json
 
 输出进度提示：`🔎 静态扫描完成（{N} 个项目单元）`
 
-### 步骤 4 · 并行调度 6 个审计 Agent（跳过条件：`--quick`）
+### 步骤 4 · 分批调度审计 Agent（跳过条件：`--quick`）
+
+**核心原则：每个 Agent 完成后立即输出结果，避免上下文膨胀。**
+
+**执行流程（每批）：**
+
+1. **单条消息并行发起本批所有 Agent**
+2. **收到 Agent 返回后，立即处理并输出**（不要等其他 Agent）：
+   - 提取 JSON（若包含代码块则提取，纯 JSON 直接使用）
+   - 用 `Write` 保存到 `{PROJECT_ROOT}/docs/review/.tmp/{dimension}.json`
+   - 输出进度提示：`✅ {dimension} 完成（score: XX, findings: X）`
+   - **不要在内存中累积 Agent 返回内容**，立即释放上下文
+
+**分批策略：**
+
+| 批次 | 维度 | 数量 | 发起时机 |
+|:----:|------|:----:|----------|
+| 第一批 | security + architecture + performance + error-handling | 4 | 先发起 |
+| 第二批 | observability + data-integrity + scalability | 3 | 第一批全部完成后发起 |
+| 第三批 | dead-code + testing + standards | 3 | 第二批全部完成后发起 |
 
 **关键约束：**
 
-1. **尽量并行，分批调度。** 将 6 个 Agent 分为 2 批：第一批 3 个（security + architecture + performance），第二批 3 个（dead-code + testing + standards）。每批在单条消息中并行发起。
-2. `subagent_type` 固定为 `Explore`（只读、专为代码库分析优化）。
-3. 每个 Agent 的 `prompt` 必须**自包含**：显式列出项目路径、技术栈、输出 JSON schema、深度要求。**共享上下文（检查清单）通过本文件内的变量引用传递，不需要在每个 Agent prompt 中完整重复。**
-4. Agent 返回的 JSON 文本由父级用 `Write` 保存到 `{PROJECT_ROOT}/docs/review/.tmp/{dimension}.json`。
+1. `subagent_type` 固定为 `Explore`（只读、专为代码库分析优化）
+2. 每个 Agent 的 `prompt` 必须**自包含**：显式列出项目路径、技术栈、输出 JSON schema、深度要求
+3. **禁止在内存中保留 Agent 返回内容**，收到后立即处理、输出、释放
+4. 每批完成后，用 `Read` 抽样校验本批结果（详见步骤 5）
 
 #### 共享 JSON schema（所有 Agent 共用）
 
@@ -264,7 +283,7 @@ review_timeout 60 cd "{PROJECT_UNITS[0].path}" && npx --yes knip --reporter json
 
 ```json
 {
-  "dimension": "security|architecture|performance|dead-code|testing|standards",
+  "dimension": "security|architecture|performance|error-handling|observability|data-integrity|scalability|dead-code|testing|standards",
   "score": 0-100,
   "findings": [
     {
@@ -369,6 +388,10 @@ review_timeout 60 cd "{PROJECT_UNITS[0].path}" && npx --yes knip --reporter json
 - **security**：OWASP Top 10 + `硬编码密钥/不安全随机数/敏感日志/输入验证缺失` + 语言特定（Java SQL注入/Spring Security、Rust unsafe/unwrap/FFI、Go fmt.Sprintf SQL/goroutine 竞态、Node innerHTML/原型污染、Python f-string SQL/os.system）
 - **architecture**：SOLID/循环依赖/分层违规 + 语言特定（Spring Controller→Service→Repo、Rust mod/trait/生命周期、Go cmd/internal/pkg、前端组件分层/状态管理、Python View/Model/Service）
 - **performance**：N+1/缺索引/SELECT * + 语言特定（Hibernate N+1/HikariCP、Rust clone/Arc、Go goroutine 泄漏/channel 阻塞、前端重渲染/包体积/Web Vitals、Node 事件循环阻塞、Python select_related）
+- **error-handling**：异常处理完整性（空 catch/吞异常）、错误边界、失败回退策略、错误消息可读性（含上下文）、重试机制合理性、超时处理、语言特定（Java checked/unchecked、Rust Result/Option、Go panic/recover、Node Promise rejection、Python try/except 最佳实践）
+- **observability**：日志完整性（请求入口/出口/异常、结构化日志）、监控指标覆盖（关键业务指标/性能指标）、告警阈值合理性、trace 链路完整性、debug 信息可追溯性、语言特定（Java SLF4J/Logback、Rust tracing crate、Go logrus/zap、Node winston/pino、Python structlog）
+- **data-integrity**：输入验证完整性（API 入口/数据库写入）、数据校验规则、事务边界明确性、幂等性设计、并发安全（锁/原子操作/乐观锁）、语言特定（Java Bean Validation、Rust 类型安全、Go context/errgroup、前端表单验证、Python Pydantic）
+- **scalability**：分片策略合理性、限流机制（令牌桶/漏桶）、熔断器配置、降级策略明确性、无状态设计、热点数据处理、语言特定（Java Resilience4j、Rust async 并发模型、Go channel 并发控制、Node cluster/pm2、Python Celery 并发）
 - **dead-code**：未用函数/导出/导入/依赖、死分支、注释代码、废弃文件。**必须先 Read `{PROJECT_ROOT}/docs/review/.tmp/{knip,udeps,vulture,staticcheck}_{unit_index}.json`。**
 - **testing**：覆盖率缺口/关键路径/边界/测试异味/不稳定测试。优先从已有覆盖率产物推断，无产物时标 `coverage: unknown` 不推测。
 - **standards**：CLAUDE.md 合规 + 语言特定 lint（Checkstyle/clippy/staticcheck/ESLint/Ruff）+ 命名 + 文档
@@ -378,27 +401,50 @@ review_timeout 60 cd "{PROJECT_UNITS[0].path}" && npx --yes knip --reporter json
 - **security**：敏感数据暴露（文档中是否包含示例密码/API密钥/真实业务数据）、PII 脱敏、认证/授权设计完整性、数据加密/传输安全设计、多租户隔离方案、API 安全设计、密钥管理、容灾与备份策略
 - **architecture**：DDD 建模质量（聚合根/值对象/领域边界）、领域一致性（跨文档领域划分是否矛盾）、服务拆分合理性、事件驱动设计完整性、跨域事务设计（Saga）、技术选型合理性、架构图一致性
 - **performance**：缓存策略设计、数据库优化策略、异步处理设计、消息队列使用合理性、扩展性设计、大数据量报表生成策略、监控指标完整性
+- **error-handling**：异常处理策略覆盖（各场景错误处理方案）、错误码设计完整性、错误恢复机制说明、用户友好错误提示设计、故障排查指南
+- **observability**：监控方案完整性、日志策略说明、告警规则设计、trace 方案说明、调试信息获取方式、运维手册完整性
+- **data-integrity**：数据校验规则说明、事务设计文档、幂等性设计说明、并发控制方案、数据一致性保障方案
+- **scalability**：扩容方案设计、限流熔断降级策略、分片方案、热点数据处理方案、性能瓶颈预案
 - **dead-code**：过时/矛盾的描述、重复内容、废弃章节、与其他文档冲突的信息、未更新的占位符
 - **testing**：测试策略是否在设计文档中覆盖、测试指标是否明确、测试场景完整性、可测试性设计
 - **standards**：文档命名规范、术语一致性、格式统一性、目录结构清晰度、跨文档引用完整性
 
-### 步骤 5 · 收集 Agent 结果
+### 步骤 5 · 批次校验（在每批 Agent 完成后立即执行）
 
-输出进度提示：`📊 正在收集审计结果…`
+**校验时机：** 每批 Agent 全部返回后，立即校验本批结果（不等其他批次）。
 
-对每个返回结果：
+**校验流程：**
 
-1. 若 Agent 返回包含 ` ```json``` ` 代码块，先提取代码块中的 JSON；若为纯 JSON 直接使用；若仍无法解析则写入 `{"dimension":"...","score":0,"findings":[],"summary":"validation_error: invalid_json","coverage":{"files_examined":0,"skipped_reason":"agent output was not valid JSON"}}`
-2. 用 `Write` 保存合法 JSON 到 `{PROJECT_ROOT}/docs/review/.tmp/{dimension}.json`
-3. 校验 JSON schema：`score` 在 0-100、`severity` 合法、`file:line` 存在（用 `Read` 抽样验证 3 条 finding）
-   - **file 路径处理**：finding 的 `file` 是相对于 `REVIEW_DIR` 的相对路径，校验时需转换为绝对路径：`{REVIEW_DIR}/{file}`
-4. 校验失败 → 不要尝试继续或重启 Agent；直接标注 `validation_error`，剔除未通过校验的 findings，评分按已通过的 findings 计算
+1. **从文件读取结果**（不要从内存读取，释放上下文）：
+   - 用 `Read("{PROJECT_ROOT}/docs/review/.tmp/{dimension}.json")` 读取本批各维度结果
+   
+2. **校验 JSON schema**（抽样验证策略）：
+   - `score` 必须在 0-100 范围
+   - `severity` 必须是 `critical|high|medium|low` 之一
+   - **抽样验证 `file:line` 存在性**：
+     - 若 findings 数量 ≤ 3，验证所有 findings
+     - 若 findings 数量 > 3，验证前 3 条 findings（便于调试定位）
+     - 对每条抽样 finding：用 `Read("{REVIEW_DIR}/{finding.file}")` 验证文件存在
+     - 文件不存在 → 剔除该 finding，记录警告，用 `Write` 更新 JSON
+   - **file 路径处理**：finding 的 `file` 是相对于 `REVIEW_DIR` 的相对路径
+   
+3. **校验失败处理**：
+   - 不要尝试继续或重启 Agent
+   - 直接标注 `validation_error`，剔除未通过校验的 findings
+   - 用 `Write` 更新校验后的 JSON
+   
+4. **输出校验结果**：
+   - 输出进度提示：`🔍 {dimension} 校验完成（有效 findings: X）`
 
 ### 步骤 6 · 评分计算（确定性算法）
 
+**数据来源：从文件读取，不从内存读取。**
+
+用 `Read("{PROJECT_ROOT}/docs/review/.tmp/{dimension}.json")` 读取各维度校验后的结果，计算评分。
+
 **每个维度 `score` 由 Agent 给出，父级二次校验：**
 
-```
+```text
 # 代码项目 penalty
 code_severity_penalty = { critical: 25, high: 10, medium: 5, low: 2 }
 
@@ -414,9 +460,23 @@ final_score = min(agent_score, recomputed_score)   # 取更严苛者
 **加权综合：**
 
 ```
-# 默认权重（基于行业实践：安全优先，架构次之，性能与测试同等重要）
-default_weights = { security: 0.25, architecture: 0.20, performance: 0.15,
-                    dead-code: 0.10, testing: 0.15, standards: 0.15 }
+# 默认权重（10 维度，按重要性分层）
+# - 核心维度（安全/架构）：27%
+# - 运维维度（错误处理/可观测性/数据完整性/性能）：40%
+# - 质量维度（测试/规范/可扩展性）：28%
+# - 清理维度（死代码）：5%
+default_weights = {
+  security: 0.15,
+  architecture: 0.12,
+  performance: 0.10,
+  error-handling: 0.10,
+  observability: 0.10,
+  data-integrity: 0.10,
+  scalability: 0.08,
+  dead-code: 0.05,
+  testing: 0.10,
+  standards: 0.10
+}
 
 # 若用户指定 --weights，则使用自定义权重（需校验总和为 1.0）
 weights = user_weights || default_weights
@@ -532,6 +592,10 @@ total = Σ dimension_score × weights[dimension]
 | 安全性 | XX | XX | X | X | X | X |
 | 架构 | XX | XX | X | X | X | X |
 | 性能 | XX | XX | X | X | X | X |
+| 错误处理 | XX | XX | X | X | X | X |
+| 可观测性 | XX | XX | X | X | X | X |
+| 数据完整性 | XX | XX | X | X | X | X |
+| 可扩展性 | XX | XX | X | X | X | X |
 | 死代码 | XX | XX | X | X | X | X |
 | 测试 | XX | XX | X | X | X | X |
 | 规范 | XX | XX | X | X | X | X |
@@ -647,10 +711,10 @@ total = Σ dimension_score × weights[dimension]
 ## 使用示例
 
 ```
-/project-review                             # 全部 6 维度深度审查（当前目录）
+/project-review                             # 全部 10 维度深度审查（当前目录）
 /project-review --quick                     # 只做静态扫描（分钟级）
 /project-review security                    # 仅安全维度
-/project-review security performance        # 多维度
+/project-review security error-handling observability  # 多维度（核心运维）
 /project-review --run-tests                 # 允许跑测试（技术栈自动检测）
 /project-review --baseline                  # 与上次结果对比（首次运行自动创建基线）
 /project-review --dir src/main              # 只审查 src/main 目录
@@ -667,8 +731,10 @@ total = Σ dimension_score × weights[dimension]
 1. **不得**用 `find`/`cat` 做文件探测和内容读取；用 Glob/Read。
 2. **不得**在未指定 `--run-tests` 时执行 `mvn test`/`go test`/`cargo test`/`npm test`/`pytest`/`cargo tarpaulin` 等会触发业务逻辑的命令。
 3. **所有外部 CLI** 必须加统一超时包装（`timeout`/`gtimeout`/`python3` wrapper/`perl` wrapper）并把 stdout/stderr 分流到 `{PROJECT_ROOT}/docs/review/.tmp/`。
-4. **6 个 Agent 分 2 批调度**：第一批 3 个（security + architecture + performance），第二批 3 个（dead-code + testing + standards），每批在单条消息内并行发起。
+4. **10 个 Agent 分 3 批调度**：第一批 4 个（security + architecture + performance + error-handling），第二批 3 个（observability + data-integrity + scalability），第三批 3 个（dead-code + testing + standards），每批在单条消息内并行发起。
 5. Agent prompt 必须自包含实际值，**不得**留 `{REVIEW_DIR}` 之类未替换占位符。
-6. 三个最终文件必须用 Write 工具生成，不得用 `echo > file` 等 shell 方式。
-7. 评分公式必须按步骤 6 的确定性算法，父级二次校验后**取更严苛**的分数。
-8. **每个步骤完成后必须输出一行简短的进度提示**（如 `🔍 检测中…`、`📊 收集中…`），让用户了解执行进度。
+6. **立即输出原则**：Agent 返回后立即用 `Write` 保存结果并输出进度提示，**不得在内存中累积 Agent 返回内容**。
+7. **从文件读取原则**：后续步骤（校验/评分/报告生成）必须从 `.tmp/*.json` 文件读取数据，**不得从内存读取**。
+8. 三个最终文件必须用 Write 工具生成，不得用 `echo > file` 等 shell 方式。
+9. 评分公式必须按步骤 6 的确定性算法，父级二次校验后**取更严苛**的分数。
+10. **每个步骤完成后必须输出一行简短的进度提示**（如 `✅ security 完成`、`🔍 校验中…`），让用户了解执行进度。
