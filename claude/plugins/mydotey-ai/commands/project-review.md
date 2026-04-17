@@ -589,71 +589,198 @@ total = Σ dimension_score × weights[dimension]
 
 | 维度 | Agent评分 | 校验评分 | Critical | High | Medium | Low |
 |------|:---------:|:-------:|:--------:|:----:|:------:|:---:|
-| 安全性 | XX | XX | X | X | X | X |
-| 架构 | XX | XX | X | X | X | X |
-| 性能 | XX | XX | X | X | X | X |
-| 错误处理 | XX | XX | X | X | X | X |
-| 可观测性 | XX | XX | X | X | X | X |
-| 数据完整性 | XX | XX | X | X | X | X |
-| 可扩展性 | XX | XX | X | X | X | X |
-| 死代码 | XX | XX | X | X | X | X |
-| 测试 | XX | XX | X | X | X | X |
-| 规范 | XX | XX | X | X | X | X |
+| 🔒 安全性 | XX | XX | X | X | X | X |
+| 🏗️ 架构 | XX | XX | X | X | X | X |
+| ⚡ 性能 | XX | XX | X | X | X | X |
+| 🛡️ 错误处理 | XX | XX | X | X | X | X |
+| 👁️ 可观测性 | XX | XX | X | X | X | X |
+| 🔐 数据完整性 | XX | XX | X | X | X | X |
+| 📈 可扩展性 | XX | XX | X | X | X | X |
+| 🧹 死代码 | XX | XX | X | X | X | X |
+| ✅ 测试 | XX | XX | X | X | X | X |
+| 📐 规范 | XX | XX | X | X | X | X |
 
 **技术债务：** ~X 小时  **审查耗时：** X 分钟
 
 ---
 
-## 维度详情
+## 📑 问题索引
 
-### 安全性
+按严重度降序排列，共 {total_findings} 个问题。点击 `[id]` 可跳转到详情。
 
-| 评分类型 | 分数 |
-|---------|:---:|
-| Agent评分 | XX |
-| 校验评分 | XX |
+**⚠️ 必须列举所有 findings，不得遗漏任何一个。**
 
-**Agent 摘要：** {Agent summary}
+| ID | 维度 | 标题 | 位置 | 严重度 | 工作量 |
+|:---|:----:|:-----|:----:|:------:|:------:|
+{遍历 issues.json 中所有 findings，按 severity 降序排列：Critical → High → Medium → Low}
+| [{id}](#{id_anchor}) | {emoji} {dimension} | {title} | `{file}:{line}` | {severity_emoji} {severity} | {effort}h |
 
-**Critical 问题（X 个）**
-1. **[SEC-001]** {title} — `file:line` — {effort}h {若有多项目，显示 `[{project_unit}]`}
-   - Evidence: {evidence}
-   - Recommendation: {recommendation}
-
-**High 问题（X 个）**
-…
-
-**Medium 问题（X 个）**
-…
-
-**Low 问题（X 个）**
-…
-
-…其他维度…
+**示例**：
+| [SEC-001](#sec-001) | 🔒 安全性 | 硬编码密钥泄露 | `config.py:15` | 🔴 Critical | 0.5h |
+| [SEC-002](#sec-002) | 🔒 安全性 | SQL 注入风险 | `dao.py:42` | 🔴 Critical | 1h |
+| [ARCH-001](#arch-001) | 🏗️ 架构 | 循环依赖 | `service.py:20` | 🟠 High | 2h |
 
 ---
 
-## 优先级行动计划
-
-### P0 · 立即处理（Critical）
-1. **[SEC-001]** {title} — `file:line` — {effort}h {若有多项目，显示 `[{project_unit}]`}
-
-### P1 · 短期（High）
-…
-
-### P2 · 中期（Medium）
-…
-
-### P3 · 长期（Low）
-…
-
-**总预估工作量：** X 小时
+## 📋 维度详情
 
 ---
 
-## 基线对比（仅 --baseline 模式）
+### 🔒 安全性
 
-**对比算法：**
+**Agent 评分**：{agent_score} | **校验评分**：{recomputed_score}
+
+**Agent 摘要**：{Agent summary}
+
+**Critical 问题（{N} 个）**
+
+{遍历该维度所有 Critical findings，每个问题按以下卡片格式展示，用 `---` 分隔}
+
+---
+
+#### 🔴 [{id}] {title} {若有多项目，显示 `[{project_unit}]`}
+
+| 属性 | 值 |
+|:-----|:---|
+| **位置** | `{file}:{line}` {若多项目，显示完整相对路径 `./module-a/config.py:15`} |
+| **严重度** | Critical |
+| **工作量** | {effort}h |
+| **项目单元** | {project_unit} {仅多项目模式显示} |
+
+**问题代码**：
+```
+{evidence}
+```
+
+**修复建议**：
+{recommendation}
+
+---
+
+{继续列举所有 Critical findings，直到该档位全部展示完毕}
+
+**High 问题（{N} 个）**
+
+{遍历该维度所有 High findings，每个问题按上述卡片格式展示}
+
+---
+
+**Medium 问题（{N} 个）**
+
+{遍历该维度所有 Medium findings，每个问题按上述卡片格式展示}
+
+---
+
+**Low 问题（{N} 个）**
+
+{遍历该维度所有 Low findings，每个问题按上述卡片格式展示}
+
+---
+
+### 🏗️ 架构
+
+**Agent 评分**：{agent_score} | **校验评分**：{recomputed_score}
+
+**Agent 摘要**：{Agent summary}
+
+{遍历该维度所有 findings，按严重度分档，每个问题按卡片格式展示，用 `---` 分隔，不得遗漏}
+
+---
+
+### ⚡ 性能
+
+{遍历该维度所有 findings，按卡片格式展示所有问题}
+
+---
+
+### 🛡️ 错误处理
+
+{遍历该维度所有 findings，按卡片格式展示所有问题}
+
+---
+
+### 👁️ 可观测性
+
+{遍历该维度所有 findings，按卡片格式展示所有问题}
+
+---
+
+### 🔐 数据完整性
+
+{遍历该维度所有 findings，按卡片格式展示所有问题}
+
+---
+
+### 📈 可扩展性
+
+{遍历该维度所有 findings，按卡片格式展示所有问题}
+
+---
+
+### 🧹 死代码
+
+{遍历该维度所有 findings，按卡片格式展示所有问题}
+
+---
+
+### ✅ 测试
+
+{遍历该维度所有 findings，按卡片格式展示所有问题}
+
+---
+
+### 📐 规范
+
+{遍历该维度所有 findings，按卡片格式展示所有问题}
+
+---
+
+## 🔧 优先级行动计划
+
+**⚠️ 必须列举所有 findings，按严重度分档，不得遗漏任何一个问题。**
+
+### P0 · Critical（{N} 个，约 {hours}h）
+
+{遍历 issues.json 中所有 Critical findings，全部列举，不得遗漏}
+
+| ID | 标题 | 位置 | 工作量 |
+|:---|:-----|:----:|:------:|
+| [{id}](#{id_anchor}) | {title} | `{file}:{line}` | {effort}h |
+
+**示例**（实际执行时必须列举全部，不能用示例代替）：
+| [SEC-001](#sec-001) | 硬编码密钥泄露 | `config.py:15` | 0.5h |
+
+### P1 · High（{N} 个，约 {hours}h）
+
+{遍历 issues.json 中所有 High findings，全部列举，不得遗漏}
+
+| ID | 标题 | 位置 | 工作量 |
+|:---|:-----|:----:|:------:|
+| [{id}](#{id_anchor}) | {title} | `{file}:{line}` | {effort}h |
+
+### P2 · Medium（{N} 个，约 {hours}h）
+
+{遍历 issues.json 中所有 Medium findings，全部列举，不得遗漏}
+
+| ID | 标题 | 位置 | 工作量 |
+|:---|:-----|:----:|:------:|
+| [{id}](#{id_anchor}) | {title} | `{file}:{line}` | {effort}h |
+
+### P3 · Low（{N} 个，约 {hours}h）
+
+{遍历 issues.json 中所有 Low findings，全部列举，不得遗漏}
+
+| ID | 标题 | 位置 | 工作量 |
+|:---|:-----|:----:|:------:|
+| [{id}](#{id_anchor}) | {title} | `{file}:{line}` | {effort}h |
+
+**总预估工作量**：{total}h
+
+---
+
+## 📈 基线对比（仅 --baseline 模式）
+
+**对比算法**：
 
 1. 尝试加载上次 `{PROJECT_ROOT}/docs/review/baseline.json`
 2. **若 baseline.json 不存在**：输出「📌 首次运行，本次结果已保存为基线。下次使用 `/project-review --baseline` 即可对比。」，跳过对比表格
@@ -663,21 +790,36 @@ total = Σ dimension_score × weights[dimension]
 6. 若维度缺失（上次未审计或本次未审计），标记 `N/A`
 7. 综合分数 delta = `current_total - baseline_total`
 
-| 维度 | 上次Agent | 本次Agent | Δ Agent | 上次校验 | 本次校验 | Δ 校验 | 备注 |
-|------|:--------:|:--------:|:------:|:-------:|:-------:|:----:|------|
-| 安全性 | 78 | 82 | +4 ↑ | 50 | 55 | +5 ↑ | |
-| 架构 | N/A | 75 | N/A | N/A | 40 | N/A | 上次未审计 |
-| … |
+---
+
+### 评分趋势
+
+| 维度 | 上次 Agent | 本次 Agent | 趋势 | 上次校验 | 本次校验 | 趋势 | 备注 |
+|:----:|:----------:|:----------:|:----:|:--------:|:--------:|:----:|------|
+| 🔒 安全性 | 78 | 82 | **+4 ↑** | 50 | 55 | **+5 ↑** | |
+| 🏗️ 架构 | N/A | 75 | N/A | N/A | 40 | N/A | 上次未审计 |
+| ⚡ 性能 | 65 | 60 | **-5 ↓** | 55 | 50 | **-5 ↓** | |
+| 🛡️ 错误处理 | 70 | 72 | **+2 ↑** | 60 | 62 | **+2 ↑** | |
+| 👁️ 可观测性 | 80 | 85 | **+5 ↑** | 75 | 80 | **+5 ↑** | |
+| 🔐 数据完整性 | 75 | 78 | **+3 ↑** | 70 | 72 | **+2 ↑** | |
+| 📈 可扩展性 | 60 | 65 | **+5 ↑** | 55 | 60 | **+5 ↑** | |
+| 🧹 死代码 | 90 | 88 | **-2 ↓** | 85 | 83 | **-2 ↓** | |
+| ✅ 测试 | 50 | 55 | **+5 ↑** | 45 | 50 | **+5 ↑** | |
+| 📐 规范 | 85 | 90 | **+5 ↑** | 80 | 85 | **+5 ↑** | |
+
+**综合评分趋势**：上次 {X} → 本次 {Y} **{delta} {↑/↓}**
+
+---
 
 {若项目单元变更，附加以下表格}
 
-**项目单元变更详情：**
+### 项目单元变更详情
 
 | 变更类型 | 项目单元 | 技术栈变更 |
-|---------|----------|-----------|
-| 新增 | ./module-c | node, vue |
-| 删除 | ./module-old | - |
-| 变更 | ./module-a | java → java, kotlin |
+|:-------:|:--------:|:----------|
+| ✅ 新增 | ./module-c | node, vue |
+| ❌ 删除 | ./module-old | - |
+| 🔄 变更 | ./module-a | java → java, kotlin |
 ```
 
 ### 步骤 8 · 自动维护 .gitignore + 收尾提示
@@ -738,3 +880,4 @@ total = Σ dimension_score × weights[dimension]
 8. 三个最终文件必须用 Write 工具生成，不得用 `echo > file` 等 shell 方式。
 9. 评分公式必须按步骤 6 的确定性算法，父级二次校验后**取更严苛**的分数。
 10. **每个步骤完成后必须输出一行简短的进度提示**（如 `✅ security 完成`、`🔍 校验中…`），让用户了解执行进度。
+11. **报告完整性原则**：`report.md` 必须包含 `issues.json` 中的**所有 findings**，不得遗漏任何一个问题。问题索引表、维度详情、行动计划三处都必须列举全部问题，不能用示例或 `...` 代替。违反此条即视为执行失败。

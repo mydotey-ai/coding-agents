@@ -1,11 +1,11 @@
 {
   "name": "mydotey-ai",
-  "description": "mydotey-ai plugin - Comprehensive 10-dimension code review with immediate output and multi-project unit detection",
-  "version": "1.5.0",
+  "description": "mydotey-ai plugin - Comprehensive 10-dimension code review with card-based issue display, problem index table, and multi-project unit detection",
+  "version": "1.6.0",
   "author": {
     "name": "mydotey-ai",
     "email": "support@mydotey.org"
   },
-  "keywords": ["git", "commit", "automation", "productivity", "code-review", "multi-project", "observability", "scalability"],
+  "keywords": ["git", "commit", "automation", "productivity", "code-review", "multi-project", "card-display", "problem-index"],
   "license": "MIT"
 }
