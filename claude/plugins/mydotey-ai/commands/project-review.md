@@ -141,7 +141,7 @@ if REVIEW_DIR not in PROJECT_UNITS and has_source_files:
 📊 汇总技术栈：{TECH_STACK}，源文件：{FILE_COUNTS}
 ```
 
-### 步骤 2 · 建立输出工作区
+### 步骤 2 · 建立输出工作区 + 确保 .gitignore
 
 **在 `PROJECT_ROOT` 下创建输出目录：**
 
@@ -158,9 +158,14 @@ mkdir -p "{PROJECT_ROOT}/docs/review/.tmp"
 | `{PROJECT_ROOT}/docs/review/issues.json` | 扁平化问题列表（供 IDE 导入） |
 | `{PROJECT_ROOT}/docs/review/.tmp/*.json` | 扫描中间产物 + 每个 Agent 的原始返回 |
 
-**确保 `.gitignore` 已忽略整个目录**——见步骤 8。
+**立即确保 `.gitignore` 已忽略整个目录**（防止后续步骤产生的文件被误提交）：
 
-输出进度提示：`📁 工作区已建立：{PROJECT_ROOT}/docs/review/`
+1. `Read("{PROJECT_ROOT}/.gitignore")`，若不存在则准备新建；若存在但格式异常，发出警告后继续
+2. 用 `Grep` 检查是否已包含 `docs/review` 相关条目（匹配 `docs/review` 或 `docs/review/`）
+3. 若**未包含**，用 `Edit` 在文件末尾追加一行 `docs/review/`；文件不存在则 `Write` 新建，内容仅为 `docs/review/\n`
+4. 若**已包含**则跳过，避免重复
+
+输出进度提示：`📁 工作区已建立：{PROJECT_ROOT}/docs/review/（已确保 .gitignore 忽略）`
 
 ### 步骤 3 · 自动化静态扫描（并行 Bash）
 
@@ -171,7 +176,10 @@ mkdir -p "{PROJECT_ROOT}/docs/review/.tmp"
 - **允许**用 `|| echo '{"status":"..."}' > file.json` 写入结构化 fallback（这是写文件，不是污染 stdout）
 - **禁止**用 `|| echo "建议安装 xxx"` 或任何人类可读文本混入 stdout
 - 若维度未被选中则跳过对应扫描
-- **若 TECH_STACK 为 `["documentation"]`，跳过整个步骤 3**，直接写入 `{"status":"skipped_documentation_project"}` 到所有扫描文件
+- **若 TECH_STACK 为 `["documentation"]`，跳过整个步骤 3**，并写入以下 fallback JSON 文件（确保后续 Agent 可读取）：
+  - `gitleaks.json`：`{"status":"skipped_documentation_project"}`
+  - `semgrep.json`：`{"status":"skipped_documentation_project"}`
+  - 各项目单元的语言特定扫描文件（若已创建）：写入 `{"status":"skipped_documentation_project","project_unit":N}`
 
 **多项目单元扫描策略：**
 
@@ -213,12 +221,34 @@ review_timeout 60 gitleaks detect --source "{REVIEW_DIR}" --no-git --report-form
 review_timeout 120 semgrep --config auto --json --quiet "{REVIEW_DIR}" > "{PROJECT_ROOT}/docs/review/.tmp/semgrep.json" 2> "{PROJECT_ROOT}/docs/review/.tmp/semgrep.err" \
   || echo '{"status":"failed_or_missing"}' > "{PROJECT_ROOT}/docs/review/.tmp/semgrep.json"
 
-# 按项目单元执行语言特定扫描（示例：项目单元 0，实际执行时需替换为具体路径）
-# 注意：以下示例中的占位符需要在执行前替换为实际值
-review_timeout 60 cd "{PROJECT_UNITS[0].path}" && npm audit --json > "{PROJECT_ROOT}/docs/review/.tmp/npm_audit_0.json" 2> "{PROJECT_ROOT}/docs/review/.tmp/npm_audit_0.err" \
+# 多项目单元扫描执行策略：
+# 遍历 PROJECT_UNITS 数组，对每个项目单元根据其 tech_stack 选择对应的扫描命令
+# 输出文件名格式：{tool_name}_{unit_index}.json（unit_index 从 0 开始）
+#
+# 伪代码示例（实际执行时需替换为具体 Bash 命令）：
+# for unit_index, unit in enumerate(PROJECT_UNITS):
+#     unit_path = unit["path"]
+#     if unit["tech_stack"] contains "java":
+#         cd "{unit_path}" && review_timeout 120 mvn -q org.owasp:dependency-check-maven:check -DskipTests ...
+#     if unit["tech_stack"] contains "rust":
+#         cd "{unit_path}" && review_timeout 60 cargo audit --json > cargo_audit_{unit_index}.json
+#         cd "{unit_path}" && review_timeout 120 cargo +nightly udeps --output json > udeps_{unit_index}.json
+#     if unit["tech_stack"] contains "go":
+#         cd "{unit_path}" && review_timeout 60 govulncheck -json ./... > govulncheck_{unit_index}.json
+#         cd "{unit_path}" && review_timeout 60 staticcheck -f json ./... > staticcheck_{unit_index}.json
+#     if unit["tech_stack"] contains "node" or "typescript":
+#         cd "{unit_path}" && review_timeout 60 npm audit --json > npm_audit_{unit_index}.json
+#         cd "{unit_path}" && review_timeout 60 npx --yes knip --reporter json > knip_{unit_index}.json
+#     if unit["tech_stack"] contains "python":
+#         cd "{unit_path}" && review_timeout 60 pip-audit -f json > pip_audit_{unit_index}.json
+#         cd "{unit_path}" && review_timeout 60 vulture . > vulture_{unit_index}.json
+
+# 单个项目单元扫描命令示例（项目单元 0）：
+# 注意：cd 命令在 timeout 包装外部执行，确保 timeout 包装整个核心命令
+cd "{PROJECT_UNITS[0].path}" && review_timeout 60 npm audit --json > "{PROJECT_ROOT}/docs/review/.tmp/npm_audit_0.json" 2> "{PROJECT_ROOT}/docs/review/.tmp/npm_audit_0.err" \
   || echo '{"status":"failed_or_missing","project_unit":0}' > "{PROJECT_ROOT}/docs/review/.tmp/npm_audit_0.json"
 
-review_timeout 60 cd "{PROJECT_UNITS[0].path}" && npx --yes knip --reporter json > "{PROJECT_ROOT}/docs/review/.tmp/knip_0.json" 2> "{PROJECT_ROOT}/docs/review/.tmp/knip_0.err" \
+cd "{PROJECT_UNITS[0].path}" && review_timeout 60 npx --yes knip --reporter json > "{PROJECT_ROOT}/docs/review/.tmp/knip_0.json" 2> "{PROJECT_ROOT}/docs/review/.tmp/knip_0.err" \
   || echo '{"status":"failed_or_missing","project_unit":0}' > "{PROJECT_ROOT}/docs/review/.tmp/knip_0.json"
 ```
 
@@ -345,7 +375,7 @@ review_timeout 60 cd "{PROJECT_UNITS[0].path}" && npx --yes knip --reporter json
 - 检查清单按文档审查模式调整（见下方）
 - finding 的 file:line 指向文档中的具体位置
 
-【已有扫描结果】请先 Read 以下文件（相对于 {PROJECT_ROOT}），作为线索起点：
+【已有扫描结果】请先 Read 以下文件：
 - {PROJECT_ROOT}/docs/review/.tmp/gitleaks.json（通用安全扫描）
 - {PROJECT_ROOT}/docs/review/.tmp/semgrep.json（通用安全扫描）
 - {PROJECT_ROOT}/docs/review/.tmp/{tool}_{unit_index}.json（各项目单元的语言特定扫描）
@@ -426,7 +456,10 @@ review_timeout 60 cd "{PROJECT_UNITS[0].path}" && npx --yes knip --reporter json
      - 若 findings 数量 > 3，验证前 3 条 findings（便于调试定位）
      - 对每条抽样 finding：用 `Read("{REVIEW_DIR}/{finding.file}")` 验证文件存在
      - 文件不存在 → 剔除该 finding，记录警告，用 `Write` 更新 JSON
-   - **file 路径处理**：finding 的 `file` 是相对于 `REVIEW_DIR` 的相对路径
+   - **file 路径规范化规则**：
+     - 若 `finding.file` 以 `REVIEW_DIR` 开头（绝对路径） → 剔除前缀，转换为相对路径
+     - 若 `finding.file` 为绝对路径且不在 `REVIEW_DIR` 下 → 剔除该 finding，记录警告
+     - 若 `finding.file` 为相对路径 → 直接使用（已相对于 `REVIEW_DIR`）
    
 3. **校验失败处理**：
    - 不要尝试继续或重启 Agent
@@ -786,6 +819,14 @@ total = Σ dimension_score × weights[dimension]
 2. **若 baseline.json 不存在**：输出「📌 首次运行，本次结果已保存为基线。下次使用 `/project-review --baseline` 即可对比。」，跳过对比表格
 3. **若 `baseline.review_dir` 与本次 `REVIEW_DIR` 不同**：输出「⚠️ 审查目录已变更（上次：{baseline.review_dir}，本次：{REVIEW_DIR}），对比结果可能不准确。」，继续对比但标注差异
 4. **若项目单元变更**：对比 `baseline.project_units` 与本次 `PROJECT_UNITS`，输出差异说明（新增/删除/变更的项目单元）
+   
+   **项目单元变更判定规则**：
+   - **新增**：本次存在（路径匹配）但上次不存在
+   - **删除**：上次存在（路径匹配）但本次不存在
+   - **变更**：路径相同但 `tech_stack` 或 `build_files` 不同
+   
+   **路径匹配规则**：比较 `rel_path` 字段（相对于 REVIEW_DIR 的相对路径），确保跨路径前缀一致性
+   
 5. 对每个维度计算 delta：`delta = current_score - baseline_score`
 6. 若维度缺失（上次未审计或本次未审计），标记 `N/A`
 7. 综合分数 delta = `current_total - baseline_total`
@@ -822,24 +863,14 @@ total = Σ dimension_score × weights[dimension]
 | 🔄 变更 | ./module-a | java → java, kotlin |
 ```
 
-### 步骤 8 · 自动维护 .gitignore + 收尾提示
+### 步骤 8 · 收尾提示
 
-**自动追加 `docs/review/` 到项目根目录 `.gitignore`（幂等）：**
-
-**关键说明：**
-- `.gitignore` 必须位于项目根目录 `{PROJECT_ROOT}`，而非审查目录 `{REVIEW_DIR}`
-- 输出目录 `docs/review/` 始终位于 `{PROJECT_ROOT}` 下，需要根目录的 `.gitignore` 来忽略
-- 若 `{REVIEW_DIR}` 与 `{PROJECT_ROOT}` 不同，审查目录下的 `.gitignore` 不适用
-
-1. `Read("{PROJECT_ROOT}/.gitignore")`，若不存在则准备新建；若存在但格式异常，发出警告后继续；发起前必须替换 `{PROJECT_ROOT}` 为项目根目录的绝对路径
-2. 用 `Grep` 检查是否已包含 `docs/review` 相关条目（匹配 `docs/review` 或 `docs/review/`）
-3. 若**未包含**，用 `Edit` 在文件末尾追加一行 `docs/review/`；文件不存在则 `Write` 新建，内容仅为 `docs/review/\n`
-4. 若**已包含**则跳过，避免重复
+**注意**：`.gitignore` 检查已在步骤 2 完成，此处仅输出最终提示。
 
 完成后输出**一次性**提示：
 
 ```
-✅ 已确保 .gitignore 忽略 docs/review/
+✅ 审查完成（.gitignore 已在步骤 2 确保忽略 docs/review/）
 📄 报告位置（{PROJECT_ROOT} 下）：
    docs/review/report.md       （完整报告）
    docs/review/baseline.json   （基线指标）
