@@ -6,4 +6,4 @@ update-coding-agents
 
 ccr restart
 
-start-hapi-hub
+hapi-hub restart

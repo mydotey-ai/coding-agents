@@ -1,0 +1,87 @@
+#!/bin/bash
+
+set -uo pipefail
+
+wd="$(cd "$(dirname "$0")" && pwd)"
+mkdir -p "$wd" 2>/dev/null || true
+pattern="hapi hub --relay$"
+log_file="$wd/hapi-hub.out"
+
+usage() {
+  printf 'Usage: %s {start|stop|restart|status|logs}\n' "$(basename "$0")" >&2
+  exit 0
+}
+
+list_pids() {
+  pgrep -f "$pattern" || true
+}
+
+is_running() {
+  pgrep -f "$pattern" >/dev/null 2>&1
+}
+
+start_hub() {
+  if is_running; then
+    printf 'hapi-hub is already running\n'
+    return 0
+  fi
+
+  touch "$log_file" 2>/dev/null || true
+  HAPI_RELAY_FORCE_TCP=true hapi hub --relay >> "$log_file" 2>&1 &
+  printf 'hapi-hub started\n'
+}
+
+stop_hub() {
+  local pids
+
+  pids=$(list_pids)
+  if [[ -z "$pids" ]]; then
+    printf 'hapi-hub is not running\n'
+    return 0
+  fi
+
+  pkill -f "$pattern" >/dev/null 2>&1 || true
+  printf 'hapi-hub stopped: %s\n' "$pids"
+}
+
+status_hub() {
+  local pids
+
+  pids=$(list_pids)
+  if [[ -z "$pids" ]]; then
+    printf 'hapi-hub is not running\n'
+    return 0
+  fi
+
+  printf 'hapi-hub is running: %s\n' "$pids"
+}
+
+logs_hub() {
+  touch "$log_file" 2>/dev/null || true
+  tail -f "$log_file" || true
+}
+
+case "${1:-}" in
+  start)
+    start_hub
+    ;;
+  stop)
+    stop_hub
+    ;;
+  restart)
+    stop_hub
+    while is_running; do
+      sleep 0.2
+    done
+    start_hub
+    ;;
+  status)
+    status_hub
+    ;;
+  logs)
+    logs_hub
+    ;;
+  *)
+    usage
+    ;;
+esac
