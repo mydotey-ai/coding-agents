@@ -1,9 +1,5 @@
 #!/bin/bash
 
-export ANTHROPIC_AUTH_TOKEN=xxxxxx
-
-set -x
-
-export ANTHROPIC_BASE_URL=http://127.0.0.1:3456
+source "$(dirname "$0")/config-claude-ccr"
 
 happy-freeclaude $@
