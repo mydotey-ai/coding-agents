@@ -5,13 +5,10 @@ set -x
 source ~/bin/enable-proxy
 
 claude update
-npm upgrade -g @musistudio/claude-code-router
-
 claude plugin marketplace update
 
-npm upgrade -g happy-coder
-npm upgrade -g @twsxtd/hapi
+opencode upgrade
 
 uv tool upgrade specify-cli
 
-opencode upgrade
+ncu -gu
