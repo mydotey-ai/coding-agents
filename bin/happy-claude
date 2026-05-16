@@ -2,6 +2,4 @@
 
 set -x
 
-source ~/bin/enable-proxy
-
 happy claude $@
