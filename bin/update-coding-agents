@@ -11,4 +11,5 @@ opencode upgrade
 
 uv tool upgrade specify-cli
 
-ncu -gu
+npm upgrade -g happy
+npm upgrade -g @twsxtd/hapi

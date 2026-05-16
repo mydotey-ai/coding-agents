@@ -4,6 +4,4 @@ set -x
 
 update-coding-agents
 
-ccr restart
-
 hapi-hub restart
