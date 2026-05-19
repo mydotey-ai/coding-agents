@@ -1,0 +1,22 @@
+# gitnexus-wiki
+
+使用 GitNexus 为当前仓库生成中文 Wiki 文档。
+
+## 执行步骤
+
+1. **切换到项目根目录**
+   - 运行 `git rev-parse --show-toplevel` 获取 git 根目录路径
+   - 如果当前目录不是根目录，切换到根目录
+
+2. **生成 Wiki**
+   - 运行 `gitnexus wiki --lang chinese`
+   - 等待命令完成，观察输出
+
+3. **显示结果**
+   - 显示 Wiki 生成完成状态
+   - 如有警告或错误，一并展示
+
+## 错误处理
+
+- gitnexus 未安装：提示用户先安装 gitnexus
+- 命令执行失败：显示详细错误信息，建议检查 gitnexus 配置
