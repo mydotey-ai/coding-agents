@@ -13,3 +13,4 @@ uv tool upgrade specify-cli
 
 npm upgrade -g happy
 npm upgrade -g @twsxtd/hapi
+npm upgrade -g gitnexus
