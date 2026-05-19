@@ -1,6 +1,6 @@
 # gitnexus-wiki
 
-使用 GitNexus 为当前仓库生成中文 Wiki 文档。
+使用 GitNexus 为当前仓库生成 Wiki 文档。
 
 ## 执行步骤
 
@@ -9,7 +9,7 @@
    - 如果当前目录不是根目录，切换到根目录
 
 2. **生成 Wiki**
-   - 运行 `gitnexus wiki --lang chinese`
+   - 运行 `gitnexus wiki`
    - 等待命令完成，观察输出
 
 3. **显示结果**
