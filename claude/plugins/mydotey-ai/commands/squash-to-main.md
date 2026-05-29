@@ -1,3 +1,8 @@
+---
+description: 压缩当前分支的所有提交，合并到本地 main（或 master）分支。用于整理 worktree 开发后的提交历史。
+allowed-tools: ["Bash"]
+---
+
 # squash-to-main
 
 压缩当前分支的所有提交，合并到本地 main（或 master）分支。用于整理 worktree 开发后的提交历史。

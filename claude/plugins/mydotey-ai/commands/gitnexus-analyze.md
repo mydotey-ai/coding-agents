@@ -1,3 +1,8 @@
+---
+description: 使用 GitNexus 索引当前仓库，丢弃已有 embeddings 并跳过 skills 以加快速度。
+allowed-tools: ["Bash"]
+---
+
 # gitnexus-analyze
 
 使用 GitNexus 索引当前仓库，丢弃已有 embeddings 并跳过 skills 以加快速度。

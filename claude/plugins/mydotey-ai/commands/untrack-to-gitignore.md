@@ -1,3 +1,8 @@
+---
+description: 检查 git 已跟踪的文件，将临时文件从跟踪中移除并加入 .gitignore。
+allowed-tools: ["Bash", "Read", "Edit"]
+---
+
 # untrack-to-gitignore
 
 检查 git 已跟踪的文件，将临时文件从跟踪中移除并加入 `.gitignore`。

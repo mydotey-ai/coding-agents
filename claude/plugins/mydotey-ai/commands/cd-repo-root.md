@@ -1,3 +1,8 @@
+---
+description: 切换到当前 git 仓库的根目录。
+allowed-tools: ["Bash"]
+---
+
 # cd-repo-root
 
 切换到当前 git 仓库的根目录。

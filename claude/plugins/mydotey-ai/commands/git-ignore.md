@@ -1,3 +1,8 @@
+---
+description: 扫描项目中的临时文件、构建产物、IDE 配置等，自动更新 .gitignore。
+allowed-tools: ["Bash", "Read", "Edit", "Glob", "Grep"]
+---
+
 # git-ignore
 
 扫描项目中的临时文件、构建产物、IDE 配置等，更新 `.gitignore`。

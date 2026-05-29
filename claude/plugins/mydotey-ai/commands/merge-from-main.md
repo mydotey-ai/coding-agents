@@ -1,3 +1,8 @@
+---
+description: 将本地 main 分支的代码合并到当前 worktree 分支，用于同步主分支的最新改动。
+allowed-tools: ["Bash"]
+---
+
 # merge-from-main
 
 将本地 main 分支的代码合并到当前 worktree 分支。用于同步主分支的最新改动。

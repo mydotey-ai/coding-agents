@@ -1,3 +1,8 @@
+---
+description: 自动分析代码改动，生成自然的 commit message 并推送到远程仓库。完全自动化，无需交互确认。
+allowed-tools: ["Bash", "Read"]
+---
+
 # commit-and-push
 
 自动分析代码改动，生成自然的 commit message 并推送到远程仓库。完全自动化，无需交互确认。

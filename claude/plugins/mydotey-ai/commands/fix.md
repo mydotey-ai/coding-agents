@@ -1,3 +1,8 @@
+---
+description: 对最近对话中发现的问题，按建议全部修复。有特殊说明的，特殊处理。
+allowed-tools: ["Bash", "Read", "Write", "Edit", "Glob", "Grep"]
+---
+
 # fix
 
 对最近对话中发现的问题，按建议全部修复。有特殊说明的，特殊处理。

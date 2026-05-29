@@ -1,3 +1,8 @@
+---
+description: 使用 GitNexus 为当前仓库生成 Wiki 文档。
+allowed-tools: ["Bash"]
+---
+
 # gitnexus-wiki
 
 使用 GitNexus 为当前仓库生成 Wiki 文档。

@@ -1,3 +1,8 @@
+---
+description: AI 任务执行中途停下来时，让它继续完成未完成的工作。
+allowed-tools: ["Bash", "Read", "Write", "Edit", "Glob", "Grep"]
+---
+
 # continue
 
 AI 任务执行中途停下来时，用此命令让它继续完成未完成的工作。

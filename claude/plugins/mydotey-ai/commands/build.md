@@ -1,3 +1,9 @@
+---
+description: 构建项目并组织成标准应用安装包（tar.gz），内含 bin/app.sh 用于运行维护。支持 Java/Maven/Gradle/Node.js 项目。
+argument-hint: "[module]"
+allowed-tools: ["Bash", "Read", "Write", "Edit", "Glob", "Grep"]
+---
+
 # build
 
 构建项目并组织成标准应用安装包（tar.gz），内含 bin/app.sh 用于运行维护。

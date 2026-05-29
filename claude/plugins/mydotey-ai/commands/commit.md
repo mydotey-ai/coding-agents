@@ -1,3 +1,8 @@
+---
+description: 自动分析代码改动，生成自然的 commit message 并提交。只提交不推送。
+allowed-tools: ["Bash", "Read"]
+---
+
 # commit
 
 自动分析代码改动，生成自然的 commit message 并提交。只提交不推送。
