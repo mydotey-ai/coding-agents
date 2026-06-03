@@ -10,7 +10,7 @@ claude plugin marketplace update
 opencode upgrade
 
 uv tool upgrade specify-cli
-openspec update
+npm upgrade -g @fission-ai/openspec
 
 npm upgrade -g happy
 npm upgrade -g @twsxtd/hapi
