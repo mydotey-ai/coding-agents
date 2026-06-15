@@ -1,0 +1,239 @@
+{
+  "plugin": [],
+  "$schema": "https://opencode.ai/config.json",
+  "permission": "allow",
+  "compaction": {
+    "auto": true,
+    "prune": true
+  },
+  "instructions": ["用中文回答问题/思考"],
+  "provider": {
+    "moonshot": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "moonshot",
+      "options": {
+        "baseURL": "https://api.kimi.com/coding/v1",
+        "includeUsage": true
+      },
+      "models": {
+        "kimi-for-coding": {
+          "name": "kimi-for-coding",
+          "limit": {
+            "context": 256000,
+            "output": 64000
+          }
+        }
+      }
+    },
+    "volcengine": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "volcengine",
+      "options": {
+        "baseURL": "https://ark.cn-beijing.volces.com/api/coding/v3",
+        "includeUsage": true
+      },
+      "models": {
+        "doubao-seed-2.0-code": {
+          "name": "doubao-seed-2.0-code",
+          "limit": {
+            "context": 256000,
+            "output": 64000
+          }
+        },
+        "glm-5.1": {
+          "name": "glm-5.1",
+          "limit": {
+            "context": 200000,
+            "output": 128000
+          }
+        },
+        "kimi-k2.6": {
+          "name": "kimi-k2.6",
+          "limit": {
+            "context": 256000,
+            "output": 64000
+          }
+        }
+      }
+    },
+    "dashscope": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "dashscope",
+      "options": {
+        "baseURL": "https://coding.dashscope.aliyuncs.com/v1",
+        "includeUsage": true
+      },
+      "models": {
+        "glm-5": {
+          "name": "glm-5",
+          "limit": {
+            "context": 200000,
+            "output": 128000
+          }
+        }
+      }
+    },
+    "qianfan": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "qianfan",
+      "options": {
+        "baseURL": "https://qianfan.baidubce.com/v2/coding",
+        "includeUsage": true
+      },
+      "models": {
+        "glm-5.1": {
+          "name": "glm-5.1",
+          "limit": {
+            "context": 200000,
+            "output": 128000
+          }
+        }
+      }
+    },
+    "jdcloud": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "jdcloud",
+      "options": {
+        "baseURL": "https://modelservice.jdcloud.com/coding/openai/v1",
+        "includeUsage": true
+      },
+      "models": {
+        "GLM-5": {
+          "name": "GLM-5",
+          "limit": {
+            "context": 200000,
+            "output": 128000
+          }
+        }
+      }
+    },
+    "cucloud": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "cucloud",
+      "options": {
+        "baseURL": "https://aigw-gzgy2.cucloud.cn:8443/v1",
+        "includeUsage": true
+      },
+      "models": {
+        "glm-5.1": {
+          "name": "glm-5.1",
+          "limit": {
+            "context": 200000,
+            "output": 128000
+          }
+        }
+      }
+    },
+    "xfyun": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "xfyun",
+      "options": {
+        "baseURL": "https://maas-coding-api.cn-huabei-1.xf-yun.com/v2",
+        "includeUsage": true
+      },
+      "models": {
+        "xopglm51": {
+          "name": "glm-5.1",
+          "limit": {
+            "context": 200000,
+            "output": 128000
+          }
+        }
+      }
+    },
+    "minimax": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "minimax",
+      "options": {
+        "baseURL": "https://api.minimaxi.com/v1",
+        "includeUsage": true
+      },
+      "models": {
+        "MiniMax-M2.7": {
+          "name": "MiniMax-M3",
+          "limit": {
+            "context": 1000000,
+            "output": 128000
+          }
+        }
+      }
+    },
+    "aicodewith-openai": {
+      "npm": "@ai-sdk/openai",
+      "name": "aicodewith-openai",
+      "options": {
+        "baseURL": "https://api.aicodewith.com/chatgpt/v1",
+        "includeUsage": true
+      },
+      "models": {
+        "gpt-5.5": {
+          "name": "gpt-5.5",
+          "limit": {
+            "context": 1000000,
+            "output": 128000
+          }
+        },
+        "gpt-5.4": {
+          "name": "gpt-5.4",
+          "limit": {
+            "context": 1000000,
+            "output": 128000
+          }
+        },
+        "gpt-5.3-codex": {
+          "name": "gpt-5.3-codex",
+          "limit": {
+            "context": 1000000,
+            "output": 128000
+          }
+        }
+      }
+    },
+    "local-openai": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "local-openai",
+      "options": {
+        "baseURL": "http://127.0.0.1:8317/v1",
+        "includeUsage": true
+      },
+      "models": {
+        "gemini-3.1-pro": {
+          "name": "gemini-3.1-pro",
+          "limit": {
+            "context": 1000000,
+            "output": 128000
+          }
+        },
+        "gemini-2.5-pro": {
+          "name": "gemini-2.5-pro",
+          "limit": {
+            "context": 1000000,
+            "output": 128000
+          }
+        },
+        "haiku-4.5": {
+          "name": "haiku-4.5",
+          "limit": {
+            "context": 256000,
+            "output": 65536
+          }
+        },
+        "sonnet-4.6": {
+          "name": "sonnet-4.6",
+          "limit": {
+            "context": 1000000,
+            "output": 128000
+          }
+        },
+        "opus-4.7": {
+          "name": "opus-4.7",
+          "limit": {
+            "context": 1000000,
+            "output": 128000
+          }
+        }
+      }
+    }
+  },
+  "mcp": {}
+}
