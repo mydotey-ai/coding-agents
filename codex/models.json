@@ -1,0 +1,76 @@
+{
+  "models": [
+    {
+      "slug": "deepseek-v4-flash",
+      "display_name": "deepseek-v4-flash",
+      "description": "deepseek-v4-flash",
+      "visibility": "list",
+      "supported_in_api": true,
+      "priority": 10,
+      "context_window": 1000000,
+      "max_context_window": 1000000,
+      "effective_context_window_percent": 90,
+      "auto_compact_token_limit": 900000,
+      "default_reasoning_level": "max",
+      "supported_reasoning_levels": [
+        { "effort": "none", "description": "关闭" },
+        { "effort": "low", "description": "轻量" },
+        { "effort": "medium", "description": "均衡" },
+        { "effort": "high", "description": "深度" },
+        { "effort": "xhigh", "description": "额外深度" },
+        { "effort": "max", "description": "最大深度" }
+      ],
+      "supports_reasoning_summaries": true,
+      "default_reasoning_summary": "auto",
+      "input_modalities": ["text", "image"],
+      "supports_parallel_tool_calls": true,
+      "supports_search_tool": true,
+      "apply_patch_tool_type": "freeform",
+      "shell_type": "shell_command",
+      "base_instructions": "",
+      "truncation_policy": {
+        "mode": "tokens",
+        "limit": 10000
+      },
+      "support_verbosity": true,
+      "default_verbosity": "low",
+      "experimental_supported_tools": []
+    },
+    {
+      "slug": "deepseek-v4-pro",
+      "display_name": "deepseek-v4-pro",
+      "description": "deepseek-v4-pro",
+      "visibility": "list",
+      "supported_in_api": true,
+      "priority": 10,
+      "context_window": 1000000,
+      "max_context_window": 1000000,
+      "effective_context_window_percent": 90,
+      "auto_compact_token_limit": 900000,
+      "default_reasoning_level": "max",
+      "supported_reasoning_levels": [
+        { "effort": "none", "description": "关闭" },
+        { "effort": "low", "description": "轻量" },
+        { "effort": "medium", "description": "均衡" },
+        { "effort": "high", "description": "深度" },
+        { "effort": "xhigh", "description": "额外深度" },
+        { "effort": "max", "description": "最大深度" }
+      ],
+      "supports_reasoning_summaries": true,
+      "default_reasoning_summary": "auto",
+      "input_modalities": ["text", "image"],
+      "supports_parallel_tool_calls": true,
+      "supports_search_tool": true,
+      "apply_patch_tool_type": "freeform",
+      "shell_type": "shell_command",
+      "base_instructions": "",
+      "truncation_policy": {
+        "mode": "tokens",
+        "limit": 10000
+      },
+      "support_verbosity": true,
+      "default_verbosity": "low",
+      "experimental_supported_tools": []
+    }
+  ]
+}

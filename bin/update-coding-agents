@@ -7,11 +7,13 @@ source ~/bin/enable-proxy
 claude update
 claude plugin marketplace update
 
+codex update
+
 opencode upgrade
 
 uv tool upgrade specify-cli
 npm upgrade -g @fission-ai/openspec
 
 npm upgrade -g happy
-npm upgrade -g @twsxtd/hapi
+npm upgrade -g @twsxtd/hapi --registry=https://registry.npmjs.org
 npm upgrade -g gitnexus

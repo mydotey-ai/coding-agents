@@ -1,0 +1,12 @@
+model_provider = "deepseek"
+model = "deepseek-v4-flash"
+model_reasoning_effort = "max"
+network_access = "enabled"
+disable_response_storage = true
+model_catalog_json = "~/.codex/models.json"
+
+[model_providers.deepseek]
+name = "deepseek"
+base_url = "https://api.deepseek.com"
+wire_api = "responses"
+env_key = "DEEPSEEK_API_KEY"
