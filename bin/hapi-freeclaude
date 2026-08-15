@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [ -f ~/bin/config-hapi ]; then
+    source ~/bin/config-hapi
+fi
+
 set -x
 
 source ~/bin/enable-proxy

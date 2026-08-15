@@ -1,0 +1,9 @@
+set +x
+
+export CLI_API_TOKEN=""
+
+set -x
+
+export HAPI_API_URL=""
+
+set +x
