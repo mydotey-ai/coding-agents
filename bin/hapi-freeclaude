@@ -8,4 +8,4 @@ set -x
 
 source ~/bin/enable-proxy
 
-hapi $@
+hapi claude $@

@@ -6,4 +6,4 @@ fi
 
 set -x
 
-hapi $@
+hapi claude $@
