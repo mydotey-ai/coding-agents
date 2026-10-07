@@ -1,0 +1,6 @@
+#! /usr/bin/bash
+
+cd ~/Tools/open-design
+source $NVM_DIR/nvm.sh
+nvm use 24
+pnpm tools-dev
