@@ -1,0 +1,14 @@
+#!/bin/bash
+
+set -x
+
+source ~/bin/enable-proxy
+
+# 1. 查看全局过时包
+outdated=$(npm outdated -g --depth=0)
+echo "$outdated"
+
+# 2. 逐个升级
+for pkg in $(echo "$outdated" | awk 'NR>1{print $1}'); do
+  npm upgrade -g "$pkg"
+done
