@@ -1,8 +1,7 @@
 #!/bin/bash
 
-# 守护进程管理: run-daemon start <cmd...> | run-daemon stop <name> | run-daemon status
-# 只作用于当前目录：typescript 落在 "<cwd>/<name>.out"，stop/status 按绝对路径匹配，
-# 所以不同目录下同名的 daemon 互不干扰
+# 守护进程管理: run-daemon start <cmd...> | run-daemon stop <name> | run-daemon status [name]
+# 只作用于当前目录：状态记录在 "<cwd>/.run-daemon.<name>.pid"，不同目录同名互不干扰
 #
 # claude/hapi 等 TUI 程序检测到 stdout 不是终端时会退化为 print 模式并立即退出，
 # 所以用 script 分配伪 TTY 来跑；nohup 让其脱离终端存活
@@ -16,34 +15,92 @@ tree_pids() {
     done
 }
 
-cmd=$1; shift
+pidfile() { printf '%s/.run-daemon.%s.pid' "$PWD" "$1"; }
+
+alive() { [ -n "$1" ] && kill -0 "$1" 2>/dev/null; }
+
+# show_daemon <pidfile> — 打印一行状态
+show_daemon() {
+    local pf name pid n
+    pf=$(basename "$1")
+    name=${pf#.run-daemon.}; name=${name%.pid}
+    pid=$(cat "$1")
+    n=$(tree_pids "$pid" | wc -l | tr -d ' ')
+    printf '%-20s pid %-7s 已运行 %-10s 进程 %d 个\n' "$name" "$pid" "$(ps -p "$pid" -o etime= | tr -d ' ')" "$n"
+}
+
+cmd=$1; [ $# -gt 0 ] && shift
 
 case $cmd in
     start)
-        nohup script -q "$PWD/$1.out" "$@" < /dev/null > /dev/null 2>&1 &
+        [ -n "$1" ] || { echo "用法: run-daemon start <cmd> [args...]" >&2; exit 1; }
+        pf=$(pidfile "$1")
+        oldpid=$(cat "$pf" 2>/dev/null)
+        if alive "$oldpid"; then
+            echo "$1 已在运行 (pid $oldpid)，先 stop 再 start" >&2
+            exit 1
+        fi
+        rm -f "$pf"
+        # macOS 的 script 语法是 `script file cmd...`，Linux (util-linux) 是 `script -c cmd file`
+        # stderr 不重定向，script 启动失败时能直接看到报错
+        case $(uname -s) in
+            Darwin) nohup script -q "$PWD/$1.out" "$@" < /dev/null > /dev/null & ;;
+            *)      nohup script -q -c "$(printf '%q ' "$@")" "$PWD/$1.out" < /dev/null > /dev/null & ;;
+        esac
+        echo $! > "$pf"
+        show_daemon "$pf"
         ;;
     stop)
-        for pid in $(pgrep -f "script -q $PWD/$1.out"); do
-            for p in $(tree_pids "$pid"); do
-                kill "$p" 2>/dev/null
-            done
+        [ -n "$1" ] || { echo "用法: run-daemon stop <name>" >&2; exit 1; }
+        pf=$(pidfile "$1")
+        pid=$(cat "$pf" 2>/dev/null)
+        if ! alive "$pid"; then
+            rm -f "$pf"
+            echo "$1 没有在运行"
+            exit 1
+        fi
+        # 先整树 SIGTERM，等最多 2 秒，仍活着则 SIGKILL 兜底（pid 列表提前收集，避免杀的过程中树变化漏杀）
+        pids=$(tree_pids "$pid")
+        for p in $pids; do
+            kill "$p" 2>/dev/null
         done
+        for i in 1 2 3 4; do
+            alive "$pid" || break
+            sleep 0.5
+        done
+        for p in $pids; do
+            alive "$p" && kill -9 "$p" 2>/dev/null
+        done
+        rm -f "$pf"
+        echo "$1 (pid $pid) 已停止"
         ;;
     status)
+        filter=$1
         found=0
-        for pid in $(pgrep -f "script -q $PWD/.*\.out"); do
-            found=1
-            ts=$(ps -p "$pid" -o command= | sed -E 's/^script -q ([^ ]+\.out).*/\1/')
-            name=$(basename "$ts" .out)
-            n=$(tree_pids "$pid" | wc -l | tr -d ' ')
-            printf '%-20s pid %-7s 已运行 %-10s 进程 %d 个\n' "$name" "$pid" "$(ps -p "$pid" -o etime= | tr -d ' ')" "$n"
+        for pf in .run-daemon.*.pid; do
+            [ -e "$pf" ] || continue
+            name=${pf#.run-daemon.}; name=${name%.pid}
+            if [ -n "$filter" ] && [ "$name" != "$filter" ]; then
+                continue
+            fi
+            pid=$(cat "$pf" 2>/dev/null)
+            if alive "$pid"; then
+                found=1
+                show_daemon "$pf"
+            else
+                rm -f "$pf"
+            fi
         done
         if [ "$found" = 0 ]; then
+            if [ -n "$filter" ]; then
+                echo "没有名为 $filter 的 daemon" >&2
+                exit 1
+            fi
             echo "当前目录没有运行中的 daemon"
         fi
         ;;
     *)
-        echo "用法: run-daemon start <cmd...> | run-daemon stop <name> | run-daemon status" >&2
+        echo "用法: run-daemon start <cmd> [args...] | run-daemon stop <name> | run-daemon status [name]" >&2
         exit 1
         ;;
 esac
