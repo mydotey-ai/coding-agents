@@ -10,9 +10,9 @@ outdated=$(npm outdated -g --depth=0)
 echo "$outdated"
 echo
 
-packages=$(echo "$outdated" | awk 'NR>1{print $1}')
-set -x
 # 2. 逐个升级
-for pkg in $packages; do
+for pkg in $(echo "$outdated" | awk 'NR>1{print $1}'); do
+  echo "npm upgrade -g '$pkg'"
   npm upgrade -g "$pkg"
+  echo
 done
