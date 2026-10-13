@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# 守护进程管理: run-daemon start <cmd...> | run-daemon stop <name> | run-daemon status
+# 只作用于当前目录：typescript 落在 "<cwd>/<name>.out"，stop/status 按绝对路径匹配，
+# 所以不同目录下同名的 daemon 互不干扰
+#
+# claude/hapi 等 TUI 程序检测到 stdout 不是终端时会退化为 print 模式并立即退出，
+# 所以用 script 分配伪 TTY 来跑；nohup 让其脱离终端存活
+# script 死后挂在 pty 上的子进程不会自动退出，stop 时从 script 进程递归杀整棵树
+
+tree_pids() {
+    local child
+    echo "$1"
+    for child in $(pgrep -P "$1"); do
+        tree_pids "$child"
+    done
+}
+
+cmd=$1; shift
+
+case $cmd in
+    start)
+        nohup script -q "$PWD/$1.out" "$@" < /dev/null > /dev/null 2>&1 &
+        ;;
+    stop)
+        for pid in $(pgrep -f "script -q $PWD/$1.out"); do
+            for p in $(tree_pids "$pid"); do
+                kill "$p" 2>/dev/null
+            done
+        done
+        ;;
+    status)
+        found=0
+        for pid in $(pgrep -f "script -q $PWD/.*\.out"); do
+            found=1
+            ts=$(ps -p "$pid" -o command= | sed -E 's/^script -q ([^ ]+\.out).*/\1/')
+            name=$(basename "$ts" .out)
+            n=$(tree_pids "$pid" | wc -l | tr -d ' ')
+            printf '%-20s pid %-7s 已运行 %-10s 进程 %d 个\n' "$name" "$pid" "$(ps -p "$pid" -o etime= | tr -d ' ')" "$n"
+        done
+        if [ "$found" = 0 ]; then
+            echo "当前目录没有运行中的 daemon"
+        fi
+        ;;
+    *)
+        echo "用法: run-daemon start <cmd...> | run-daemon stop <name> | run-daemon status" >&2
+        exit 1
+        ;;
+esac
