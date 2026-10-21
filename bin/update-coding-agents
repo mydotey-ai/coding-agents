@@ -12,6 +12,6 @@ codex plugin marketplace upgrade
 
 opencode upgrade
 
-uv tool upgrade specify-cli
+uv tool upgrade --all
 
 update-npm
