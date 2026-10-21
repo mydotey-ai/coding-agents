@@ -13,8 +13,5 @@ codex plugin marketplace upgrade
 opencode upgrade
 
 uv tool upgrade specify-cli
-npm upgrade -g @fission-ai/openspec
 
-npm upgrade -g happy
-npm upgrade -g @twsxtd/hapi --registry=https://registry.npmjs.org
-npm upgrade -g gitnexus
+update-npm
