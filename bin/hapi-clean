@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -x
+
+hapi runner list
+echo
+
+hapi doctor clean
+echo
+
+hapi runner start
+echo
+
+ps aux | grep hapi
+echo
