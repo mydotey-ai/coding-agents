@@ -1,0 +1,5 @@
+#!/bin/bash
+
+cd ~/bin
+hapi-clean 2>&1 > hapi-clean.out &
+
