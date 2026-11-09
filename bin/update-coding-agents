@@ -15,3 +15,6 @@ opencode upgrade
 uv tool upgrade --all
 
 update-npm
+
+npx skills check -g
+npx skills update -g
