@@ -1,0 +1,14 @@
+[Unit]
+Description=Paseo daemon
+# ponytail: nvm node 不进 PATH —— claude 是原生二进制；若日后添加需 node 的 provider，把 nvm bin 目录加进下面的 PATH
+
+[Service]
+Type=forking
+Environment=PATH=/home/koqizhao/.local/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/home/koqizhao/.local/bin/paseo daemon start
+ExecStop=/home/koqizhao/.local/bin/paseo daemon stop
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

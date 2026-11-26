@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -x
+
+dsh plugin --profile web update
+systemctl --user daemon-reload
+systemctl --user restart dsh-web

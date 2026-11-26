@@ -1,0 +1,26 @@
+[Unit]
+Description=DeepSeek Harness Web UI (dsh web)
+Documentation=https://github.com/deepseek-ai/deepseek-harness
+# dsh web 只监听 loopback，开机即可起；模型/插件是在请求时才出网，
+# 而用户级 systemd 里没有 network-online.target（写上只会得到 failed job 噪音）。
+# 不因短时间内反复崩溃就被 systemd 判为 failed 而放弃重启
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+# dsh 的 shebang 是 `#!/usr/bin/env node`，nvm 的 node 不在 systemd 默认 PATH 里，
+# 必须显式给出。升级 node 版本后要同步改这行路径。
+Environment="PATH=/home/koqizhao/.config/nvm/versions/node/v26.4.0/bin:/home/koqizhao/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+Environment="HOME=/home/koqizhao"
+Environment="DSH_HOME=/home/koqizhao/.dsh"
+WorkingDirectory=/home/koqizhao
+# --no-open: 服务里没有可用浏览器，别去拉 xdg-open
+# --host/--port: 只绑 loopback 的 3080（该插件拒绝通配地址，避免把 RCE 暴露到局域网）
+ExecStart=/home/koqizhao/.config/nvm/versions/node/v26.4.0/bin/dsh web --no-open --host 127.0.0.1 --port 3080
+Restart=on-failure
+RestartSec=5
+# dsh web 收到 SIGTERM 后有界退出；给子进程（bwrap 沙箱）留出收尾时间
+TimeoutStopSec=60
+
+[Install]
+WantedBy=default.target

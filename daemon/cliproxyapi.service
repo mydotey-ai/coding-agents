@@ -1,0 +1,14 @@
+[Unit]
+Description=CLIProxyAPI Service
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/koqizhao/cliproxyapi
+ExecStart=/home/koqizhao/cliproxyapi/cli-proxy-api
+Restart=always
+RestartSec=10
+Environment=HOME=/home/koqizhao
+
+[Install]
+WantedBy=default.target

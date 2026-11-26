@@ -1,0 +1,27 @@
+[Unit]
+Description=HAPI Hub (relay + runner)
+Documentation=file:///home/koqizhao/bin/hapi-hub
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+# hub 是前台常驻进程，所以用 Type=simple；runner 由 ExecStartPost 拉起，两者同在服务
+# 自己的 cgroup 里，stop 时 systemd 按 KillMode=control-group 一起收掉。
+Type=simple
+# 等 DNS 就绪：FlClash 启动瞬间会改写 resolv.conf，tunnel 握手失败后不会重试
+ExecStartPre=/bin/sh -c 'until getent hosts relay.hapi.run >/dev/null; do sleep 1; done'
+ExecStart=/home/koqizhao/.config/nvm/versions/node/v26.4.0/bin/hapi hub --relay
+ExecStartPost=/home/koqizhao/.config/nvm/versions/node/v26.4.0/bin/hapi runner start
+TimeoutStartSec=120
+TimeoutStopSec=60
+Restart=on-failure
+RestartSec=5
+# hapi 由 nvm 安装，必须显式给出 PATH（systemd 默认 PATH 里没有 nvm）
+Environment="PATH=/home/koqizhao/.config/nvm/versions/node/v26.4.0/bin:/home/koqizhao/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+Environment="HAPI_RELAY_FORCE_TCP=true"
+StandardOutput=append:/home/koqizhao/bin/hapi-hub.out
+StandardError=append:/home/koqizhao/bin/hapi-hub.out
+
+[Install]
+WantedBy=default.target
