@@ -1,18 +1,60 @@
 #!/bin/bash
+# 升级全局 npm 包，但排除 npm 自身。
+#
+#   ./update-npm              升级所有过时的全局包（不含 npm）
+#   ./update-npm --dry-run    只预演，不实际改动
+#
+# 为什么排除 npm：npm 12 把未知 CLI 配置项从警告改成了硬错误
+# （EUNKNOWNCONFIG: --config.fetch-retries），而 DSH 的插件查询正好传这个参数，
+# 一旦 npm 被升到 12，插件安装就会报「无法获取插件信息」。
+# 需要刻意升级 npm 时手动执行：npm i -g npm@11
+set -euo pipefail
 
-set -x
-source ~/bin/enable-proxy
-set +x
+# 不参与升级的包（正则，^...$ 精确匹配）；要再排除别的就写 '^(npm|corepack)$'
+EXCLUDE='^npm$'
+
+dry_run=''
+for arg in "$@"; do
+  [ "$arg" = "--dry-run" ] && dry_run='--dry-run'
+done
+
+if [ -f "$HOME/bin/enable-proxy" ]; then
+  set -x
+  source "$HOME/bin/enable-proxy"
+  set +x
+  echo
+fi
+
+check_npm() {
+  local major
+  major=$(npm -v | cut -d. -f1)
+  echo "npm 版本：$(npm -v)"
+  if [ "$major" -ge 12 ]; then
+    echo "!! npm 已 ≥12，DSH 插件安装会以 EUNKNOWNCONFIG 失败。回滚：npm i -g npm@11" >&2
+  fi
+}
+
+check_npm
 echo
 
-# 1. 查看全局过时包
-outdated=$(npm outdated -g --depth=0)
-echo "$outdated"
+# npm outdated 在有旧包时退出码为 1，所以 || true
+outdated=$(npm outdated -g --depth=0 || true)
+upgradable=$(echo "$outdated" | awk 'NR>1 && NF {print $1}' | grep -Ev "$EXCLUDE" || true)
+
+if [ -z "$upgradable" ]; then
+  echo "没有需要升级的全局包（npm 自身已排除）。"
+  exit 0
+fi
+
+echo "待升级："
+echo "$upgradable" | sed 's/^/  - /'
 echo
 
-# 2. 逐个升级
-for pkg in $(echo "$outdated" | awk 'NR>1{print $1}'); do
-  echo "npm upgrade -g '$pkg'"
-  npm upgrade -g "$pkg"
+for pkg in $upgradable; do
+  echo "==> npm upgrade -g $pkg $dry_run"
+  npm upgrade -g "$pkg" $dry_run
   echo
 done
+
+echo '---'
+check_npm
