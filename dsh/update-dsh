@@ -2,6 +2,11 @@
 
 set -x
 
+# linux
 dsh plugin --profile web update
 systemctl --user daemon-reload
 systemctl --user restart dsh-web
+
+# mac
+#dsh plugin --profile web update
+#launchctl kickstart -k "gui/$(id -u)/com.deepseek.dsh.web"
