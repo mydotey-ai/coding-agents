@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  LaunchAgent: 登录时自动启动 `dsh web`，崩溃后自动拉起。
+  本文件位置: ~/Library/LaunchAgents/com.deepseek.dsh.web.plist
+
+  常用命令（一次性操作，无需任何脚本）:
+    启动   launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.deepseek.dsh.web.plist
+    停止   launchctl bootout  gui/$(id -u)/com.deepseek.dsh.web
+    重启   launchctl kickstart -k gui/$(id -u)/com.deepseek.dsh.web
+    状态   launchctl print   gui/$(id -u)/com.deepseek.dsh.web
+    日志   tail -f ~/Library/Logs/dsh/web.out.log ~/Library/Logs/dsh/web.err.log
+    卸载   launchctl bootout gui/$(id -u)/com.deepseek.dsh.web
+           rm ~/Library/LaunchAgents/com.deepseek.dsh.web.plist
+
+  注意: ProgramArguments 里用的是绝对路径的 nvm Node 与 dsh 入口。
+  如果日后用 nvm 换了 Node 大版本（并重新全局安装 @deepseek-ai/dsh），
+  需要把下面两个路径一起改到新版本目录，否则服务会继续跑旧版本。
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.deepseek.dsh.web</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/zhaoqiang/.nvm/versions/node/v24.20.0/bin/node</string>
+    <string>/Users/zhaoqiang/.nvm/versions/node/v24.20.0/lib/node_modules/@deepseek-ai/dsh/lib/bin.js</string>
+    <string>web</string>
+    <string>--host</string>
+    <string>127.0.0.1</string>
+    <string>--port</string>
+    <string>3080</string>
+    <string>--no-open</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/zhaoqiang</string>
+
+  <!-- launchd 的默认 PATH 只有 /usr/bin:/bin:/usr/sbin:/sbin，
+       dsh 要跑 pnpm / git / bash / rg，所以显式补上 nvm 与 Homebrew。 -->
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/Users/zhaoqiang/.nvm/versions/node/v24.20.0/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    <key>LANG</key>
+    <string>en_US.UTF-8</string>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <!-- 只在异常退出（非 0）时重启；正常退出或被 Ctrl-C 停掉后不再自动拉起。 -->
+  <key>KeepAlive</key>
+  <dict>
+    <key>SuccessfulExit</key>
+    <false/>
+  </dict>
+
+  <!-- 启动失败时的重试间隔（秒），避免端口被占时高频重启。 -->
+  <key>ThrottleInterval</key>
+  <integer>15</integer>
+
+  <key>ProcessType</key>
+  <string>Interactive</string>
+
+  <key>StandardOutPath</key>
+  <string>/Users/zhaoqiang/Library/Logs/dsh/web.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/zhaoqiang/Library/Logs/dsh/web.err.log</string>
+</dict>
+</plist>
